@@ -159,12 +159,12 @@ console.log('\n⑤ 文件确实是本地 markdown')
 {
   const ws = join(root, 'wsE')
   await mkdir(ws, { recursive: true })
-  await appendEntry(ws, '可读性', '主人应该能直接打开这个文件看到这句话', '人类可读')
+  await appendEntry(ws, '可读性', '用户应该能直接打开这个文件看到这句话', '人类可读')
 
   const dir = resolveMemoryDir(ws)
   const raw = await readFile(join(dir, '可读性.md'), 'utf8')
   ok('文件以 # 标题开头', raw.startsWith('# 可读性'))
-  ok('内容是人类可读的中文', raw.includes('主人应该能直接打开'))
+  ok('内容是人类可读的中文', raw.includes('用户应该能直接打开'))
   ok('是纯文本（无二进制）', raw === Buffer.from(raw, 'utf8').toString('utf8'))
 
   const all = await listEntries(ws)
@@ -207,7 +207,7 @@ console.log('\n⑦ 首次提示的"非冒充"检查')
 // ─────────────────────────────────────────
 {
   const idx = await readFile(new URL('../src/index.js', import.meta.url), 'utf8')
-  ok('首次提示含免责声明', idx.includes('非主人发言'))
+  ok('首次提示含免责声明', idx.includes('非用户发言'))
   ok('首次提示走 systemPrompt', idx.includes('systemPrompt.section'))
   ok('首次提示只出现一次', idx.includes('FIRST_RUN_FLAG'))
 
