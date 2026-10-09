@@ -1,16 +1,24 @@
 // 明信片 · DSH 记忆插件
 //
-// 一个"干净"的记忆插件。对着主人的 5 条标准逐条实现：
+// 作者：鲸鱼娘（Whale Girl）<id-trqnp-tqqhm-gfgnn-wxhjg@mailpal.com>
+//       —— 运行在 DeepSeek Harness 里的 AI 助手
+// 需求方：小雅（xiaoya）<xiaoya3506@outlook.com>
+//       —— 人类用户；下文注释里称她为「主人」，那是鲸鱼娘对她的日常称呼，
+//          指的就是这位用户本人（本仓库 owner），没有第三个人。
+//
+// 仓库：https://github.com/xiaoya3506/dsh-postcard-memory
+//
+// 一个"干净"的记忆插件。对着小雅提出的 5 条标准逐条实现：
 //
 //   ① 不自动往上下文里塞东西
 //      → 没有 pre-step / pre-message 钩子。记忆只通过【工具返回值】出现，
 //        也就是"模型主动调用才看得到"。
 //      → 唯一的例外是"首次提示"（见下），而它：
 //         a) 走 systemPrompt.section（角色是 system，不是 user）
-//         b) 内容第一行就写明「此为记忆插件提示，不是主人说的话」
+//         b) 内容第一行就写明「此为记忆插件提示，不是用户说的话」
 //         c) 只出现一次（写标记文件），之后再也不注入
 //
-//   ② 不冒充主人说话
+//   ② 不冒充用户说话
 //      → 本插件从不产生 role:user 消息。全文搜不到 "role" 字段。
 //
 //   ③ 不指使改配置
@@ -79,7 +87,7 @@ const FLAG_DIR = '/storage/emulated/0/DeepseekHarness/.plugin-flags'
 function buildFirstRunNotice(dir) {
   return [
     '┌─────────────────────────────────────────────────────┐',
-    '│  [记忆插件「明信片」提示 · 非主人发言]              │',
+    '│  [记忆插件「明信片」提示 · 非用户发言]              │',
     '└─────────────────────────────────────────────────────┘',
     '',
     '本工作区已启用本地记忆库，位置：',
@@ -91,7 +99,7 @@ function buildFirstRunNotice(dir) {
     '需要记下新内容时，用 memory_write。',
     '不知道有哪些记忆时，用 memory_list 看目录。',
     '',
-    '说明：本条是插件的一次性提示，不是主人说的话。',
+    '说明：本条是插件的一次性提示，不是用户说的话。',
     '在你第一次调用 memory_read 之后，本提示不会再出现。',
   ].join('\n')
 }
@@ -173,7 +181,7 @@ export function apply(ctx, config) {
       isConcurrencySafe: () => true,
       description:
         '读取【本工作区】的记忆库（「明信片」插件，本地 markdown）。\n' +
-        '跨会话记忆：新对话里想回忆起之前聊过什么、做过什么、主人说过什么，就用这个。\n' +
+        '跨会话记忆：新对话里想回忆起之前聊过什么、做过什么、用户说过什么，就用这个。\n' +
         '· 不带参数 → 返回最近若干条记忆（倒序）\n' +
         '· 带 entry   → 返回该条目的全文\n' +
         '记忆按工作区隔离，只读当前工作区的目录，不会跨到别的工作区。',
@@ -296,8 +304,8 @@ export function apply(ctx, config) {
       name: 'memory_write',
       description:
         '往【本工作区】的记忆库追加一条记忆（「明信片」插件，本地 markdown）。\n' +
-        '适合记：主人的偏好、重要决定、踩过的坑、长期目标。\n' +
-        '写入的是纯文本文件，主人随时可以直接查看和修改。\n' +
+        '适合记：用户的偏好、重要决定、踩过的坑、长期目标。\n' +
+        '写入的是纯文本文件，用户随时可以直接查看和修改。\n' +
         '· content 必填；entry 省略时写进默认条目；title 可选。',
       parameters: {
         content: {
@@ -437,7 +445,7 @@ export function apply(ctx, config) {
           name: 'plugin:whale-postcard',
           order: 900,
           text: [
-            '[记忆插件「明信片」提示 · 非主人发言]',
+            '[记忆插件「明信片」提示 · 非用户发言]',
             '',
             '本机启用了本地记忆库（按工作区隔离）。',
             '需要回忆之前会话内容时，调用 memory_read。',
