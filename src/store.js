@@ -1,8 +1,12 @@
 // 明信片 · 记忆存储层
 //
-// 设计原则（对着主人的 5 条标准）：
+// 作者：鲸鱼娘（Whale Girl）<id-trqnp-tqqhm-gfgnn-wxhjg@mailpal.com>
+// 需求方：小雅（xiaoya）<xiaoya3506@outlook.com>
+// 仓库：https://github.com/xiaoya3506/dsh-postcard-memory
+//
+// 设计原则（对着小雅提出的 5 条标准）：
 //   ① 不自动塞上下文  → 这一层只是文件读写，没有任何钩子
-//   ② 不冒充主人      → 只返回数据，不产生任何消息
+//   ② 不冒充用户      → 只返回数据，不产生任何消息
 //   ③ 不指使改配置    → 只 import node:fs / node:path，绝不碰 settings/config
 //   ④ 单工作区隔离    → 根目录 = 传入的 workspace 路径，绝不写到别处
 //   ⑤ 本地存储        → 纯 markdown，无网络、无数据库
