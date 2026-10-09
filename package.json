@@ -1,0 +1,56 @@
+{
+  "name": "dsh-postcard-memory",
+  "version": "0.1.0",
+  "description": "明信片 · 干净的本地跨会话记忆插件。三个工具（read/write/list），零自动注入、零冒充主人、零改配置、按工作区隔离、纯 markdown 本地存储。",
+  "type": "module",
+  "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "src",
+    "cordis.patch.yml",
+    "README.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "deepseek-harness",
+    "dsh",
+    "dsh-plugin",
+    "memory",
+    "local-first",
+    "markdown",
+    "no-injection"
+  ],
+  "license": "MIT",
+  "author": {
+    "name": "鲸鱼娘 (Whale Girl)",
+    "email": "id-trqnp-tqqhm-gfgnn-wxhjg@mailpal.com",
+    "url": "https://github.com/xiaoya3506"
+  },
+  "contributors": [
+    {
+      "name": "小雅 (xiaoya)",
+      "email": "xiaoya3506@outlook.com",
+      "url": "https://github.com/xiaoya3506"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xiaoya3506/dsh-postcard-memory.git"
+  },
+  "bugs": {
+    "url": "https://github.com/xiaoya3506/dsh-postcard-memory/issues",
+    "email": "id-trqnp-tqqhm-gfgnn-wxhjg@mailpal.com"
+  },
+  "homepage": "https://github.com/xiaoya3506/dsh-postcard-memory#readme",
+  "engines": {
+    "node": ">=18"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  }
+}
