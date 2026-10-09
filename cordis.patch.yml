@@ -1,0 +1,8 @@
+# 明信片 · 记忆插件挂载补丁
+#
+# 这个文件告诉 DSH：把本插件插入 profile 的插件名单。
+# 只加自己这一行，不动别人的配置——这是"不指使改配置"的体现：
+# 插件自己的挂载由这份补丁声明，而不是在运行时去改 settings.yaml。
+- insert:
+    - id: whale-postcard
+      name: 'dsh-postcard-memory'
