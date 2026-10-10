@@ -18,8 +18,9 @@
 //         b) 内容第一行就写明「此为记忆插件提示，不是用户说的话」
 //         c) 只出现一次（写标记文件），之后再也不注入
 //
-//   ② 不冒充用户说话
+//   ② 不经过用户消息通道
 //      → 本插件从不产生 role:user 消息。全文搜不到 "role" 字段。
+//        目的：让「用户说的」和「程序生成的」始终分得清。
 //
 //   ③ 不指使改配置
 //      → 只 import node:fs / node:path 和 dsh-tools。
@@ -35,6 +36,7 @@
 import { defineTool } from '@deepseek-ai/dsh-tools'
 import { access, writeFile, mkdir } from 'node:fs/promises'
 import { join } from 'node:path'
+import { homedir } from 'node:os'
 // 同步版 fs 操作，供"插件加载期"写首次提示标记用（加载期不能用 await）
 import {
   accessSync as fsAccessSync,
@@ -72,8 +74,17 @@ const FIRST_RUN_FLAG = '.first-run-done'
  *    而首次提示的"是否已提示过"判断也在加载期完成。
  *    所以只能用一个固定位置 —— 代价是"全局只提示一次"。
  *    （记忆库本身的读写是加载期之后发生的，仍然严格按工作区隔离。）
+ *
+ * 位置选在 DSH 自己的 home 下（~/.dsh/），不放任何机器专属路径：
+ *   · 换机器、换用户都能用
+ *   · 与本插件、与 DSH 的数据放在一起，容易找到也容易清理
+ *   · 不写系统目录，不需要额外权限
  */
-const FLAG_DIR = '/storage/emulated/0/DeepseekHarness/.plugin-flags'
+function flagDir() {
+  const dshHome = process.env.DSH_HOME
+    || join(homedir(), '.dsh')
+  return join(dshHome, 'plugin-data', 'whale-postcard')
+}
 
 /**
  * 首次提示的内容。
@@ -82,7 +93,7 @@ const FLAG_DIR = '/storage/emulated/0/DeepseekHarness/.plugin-flags'
  * 并且★明确标注这不是主人说的话★。
  *
  * 所以这里的第一行就是免责声明，而且用 system 通道，
- * 不用 user 通道——从机制上就不可能冒充主人。
+ * 不用 user 通道——让模型始终知道这段文字来自程序，而不是用户。
  */
 function buildFirstRunNotice(dir) {
   return [
@@ -408,7 +419,7 @@ export function apply(ctx, config) {
   //  首次运行提示（唯一一处"注入"，且明确标注来源）
   // ────────────────────────────────────────────────
   //
-  //  ★ 三重保险，确保它"不会变成冒充主人"：
+  //  ★ 三重保险，确保「谁在说话」清晰可辨：
   //    1. 走 systemPrompt.section —— 角色是 system，不是 user
   //    2. 正文第一行写明「非主人发言」
   //    3. 只出现一次：注入后立刻写标记文件；下次不再注入
@@ -423,8 +434,8 @@ export function apply(ctx, config) {
   //     若将来 DSH 支持在 systemPrompt.section 里动态取工作区，再改回按工作区提示。
   if (cfg.firstRunNotice !== false && ctx.systemPrompt?.section) {
     // ★ 用 ESM import 顶部引入的 fs / path（原版误用了 require，ESM 里没有 require）
-    const flagDir = FLAG_DIR
-    const flag = join(flagDir, 'whale-postcard-first-run-done')
+    const dir = flagDir()
+    const flag = join(dir, FIRST_RUN_FLAG)
 
     let firstRun = false
     try {
@@ -432,7 +443,7 @@ export function apply(ctx, config) {
     } catch {
       firstRun = true
       try {
-        fsMkdirSync(flagDir, { recursive: true })
+        fsMkdirSync(dir, { recursive: true })
         fsWriteFileSync(flag, new Date().toISOString() + ' done\n', 'utf8')
       } catch {
         // 写不了标记也继续，顶多多提示一次
